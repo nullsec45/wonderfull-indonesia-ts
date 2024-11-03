@@ -13,16 +13,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id String @id @default(cuid())
-  name String @db.VarChar(75)
-  username String @unique @db.VarChar(75)
-  email String @unique @db.VarChar(75)
+model User {
+  id       String  @id @default(cuid())
+  name     String  @db.VarChar(75)
+  username String  @unique @db.VarChar(75)
+  email    String  @unique @db.VarChar(75)
   password String? @db.VarChar(255)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @maps('user')
+  @@map("users")
 }
 
+model Province {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(100)
+  regencies           Regency[]
+  TraditionalClothing TraditionalClothing[]
+
+  @@map("provinces")
+}
+
+model Regency {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(100)
+  province_id Int
+  province    Province   @relation(fields: [province_id], references: [id])
+  District    District[]
+
+  @@map("regencies")
+}
+
+model District {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(100)
+  regency_id Int
+  regency    Regency   @relation(fields: [regency_id], references: [id])
+  Village    Village[]
+
+  @@map("districts")
+}
+
+model Village {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  district_id Int
+  district    District @relation(fields: [district_id], references: [id])
+  postal_code String   @db.VarChar(10)
+
+  @@map("villages")
+}
+
+model TraditionalClothing {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  province_id Int
+  province    Province @relation(fields: [province_id], references: [id])
+  image       String   @db.VarChar(255)
+
+  @@map("traditional_clothings")
+}

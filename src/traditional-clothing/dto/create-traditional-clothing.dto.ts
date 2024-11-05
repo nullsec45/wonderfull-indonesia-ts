@@ -9,8 +9,4 @@ export class CreateTraditionalClothingDto {
     @IsNotEmpty()
     @IsNumber()
     province_id:number;
-
-    @IsNotEmpty()
-    @IsString()
-    image:string;
 }

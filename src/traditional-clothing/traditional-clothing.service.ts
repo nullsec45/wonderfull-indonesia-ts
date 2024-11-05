@@ -24,15 +24,12 @@ export class TraditionalClothingService {
     }
   }
 
-  async create(createTraditionalClothingDto: CreateTraditionalClothingDto):Promise<ResponseData> {
+  async create(createTraditionalClothingDto: CreateTraditionalClothingDto, fileName:string):Promise<ResponseData> {
       try{
-
-        if (!createTraditionalClothingDto.province_id) {
-          return responseValue(false, HttpStatus.BAD_REQUEST, 'Province ID is required');
-        }
+        const provinceId = Number(createTraditionalClothingDto.province_id);
 
         const province = await this.prisma.province.findUnique({
-          where: { id: createTraditionalClothingDto.province_id },
+          where: { id: provinceId },
         });
 
         if (!province) {
@@ -51,11 +48,13 @@ export class TraditionalClothingService {
             return responseValue(false,HttpStatus.CONFLICT,'Traditional clothing already exist');
         }
 
+    
+
         const traditionalClothing = await this.prisma.traditionalClothing.create({
           data: {
             name: createTraditionalClothingDto.name,
-            province: {connect:{id:createTraditionalClothingDto.province_id}},
-            image: createTraditionalClothingDto.image
+            province: {connect:{id:provinceId}},
+            image: fileName
           }
         });
 

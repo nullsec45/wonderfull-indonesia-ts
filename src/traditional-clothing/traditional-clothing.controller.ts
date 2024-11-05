@@ -1,17 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,Query, Res } from '@nestjs/common';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Patch, 
+  Param, 
+  Delete,
+  Query, 
+  Res, 
+  UseInterceptors, 
+  UploadedFile 
+} from '@nestjs/common';
 import { Response } from 'express'
 import { TraditionalClothingService } from './traditional-clothing.service';
 import { CreateTraditionalClothingDto } from './dto/create-traditional-clothing.dto';
 import { UpdateTraditionalClothingDto } from './dto/update-traditional-clothing.dto';
 import { PaginationDTO } from 'dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileUploadService } from 'services/file-upload/file-upload.service';
+
 
 @Controller('traditional-clothing')
 export class TraditionalClothingController {
-  constructor(private readonly traditionalClothingService: TraditionalClothingService) {}
+  constructor(
+    private readonly traditionalClothingService: TraditionalClothingService,
+    private readonly fileUploadService:FileUploadService
+  ) {}
 
   @Post()
- async create(@Body() createTraditionalClothingDto: CreateTraditionalClothingDto, @Res() response:Response) {
-    const createTraditionalClothing=await this.traditionalClothingService.create(createTraditionalClothingDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @Body() createTraditionalClothingDto: CreateTraditionalClothingDto, 
+    @Res() response:Response,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    const fileData=await this.fileUploadService.handleFileUpload(file);
+
+    if(!fileData.status){
+      return response.status(fileData.statusCode).json(fileData);
+    }
+
+    const createTraditionalClothing=await this.traditionalClothingService.create(createTraditionalClothingDto, fileData.data.data);
     return response.status(createTraditionalClothing.statusCode).json(createTraditionalClothing);
   }
 

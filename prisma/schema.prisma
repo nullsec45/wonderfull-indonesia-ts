@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
+  id       String  @id @default(uuid()) @db.VarChar(36)
   name     String  @db.VarChar(75)
   username String  @unique @db.VarChar(75)
   email    String  @unique @db.VarChar(75)
@@ -27,7 +27,7 @@ model User {
 }
 
 model Province {
-  id                  Int                   @id @default(autoincrement())
+  id                  String                @id @default(uuid()) @db.VarChar(36)
   name                String                @db.VarChar(100)
   regencies           Regency[]
   TraditionalClothing TraditionalClothing[]
@@ -36,9 +36,9 @@ model Province {
 }
 
 model Regency {
-  id          Int        @id @default(autoincrement())
+  id          String       @id @default(uuid()) @db.VarChar(36)
   name        String     @db.VarChar(100)
-  province_id Int
+  province_id String
   province    Province   @relation(fields: [province_id], references: [id])
   District    District[]
 
@@ -46,9 +46,9 @@ model Regency {
 }
 
 model District {
-  id         Int       @id @default(autoincrement())
+  id         String      @id @default(uuid()) @db.VarChar(36)
   name       String    @db.VarChar(100)
-  regency_id Int
+  regency_id String
   regency    Regency   @relation(fields: [regency_id], references: [id])
   Village    Village[]
 
@@ -56,9 +56,9 @@ model District {
 }
 
 model Village {
-  id          Int      @id @default(autoincrement())
+  id          String     @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(100)
-  district_id Int
+  district_id String
   district    District @relation(fields: [district_id], references: [id])
   postal_code String   @db.VarChar(10)
 
@@ -66,9 +66,9 @@ model Village {
 }
 
 model TraditionalClothing {
-  id          Int      @id @default(autoincrement())
+  id          String     @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(255)
-  province_id Int
+  province_id String
   province    Province @relation(fields: [province_id], references: [id])
   image       String   @db.VarChar(255)
 

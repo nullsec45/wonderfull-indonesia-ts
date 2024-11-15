@@ -7,6 +7,6 @@ export class CreateTraditionalClothingDto {
     name:string;
 
     @IsNotEmpty()
-    @IsNumber()
-    province_id:number;
+    @IsString()
+    province_id:string;
 }

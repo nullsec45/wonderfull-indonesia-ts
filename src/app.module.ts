@@ -6,9 +6,17 @@ import { TraditionalClothingModule } from './traditional-clothing/traditional-cl
 import { ProvinceService } from './region/province.service';
 import { AuthModule } from './auth/auth.module';
 import { FileUploadService } from './services/file-upload/file-upload.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, AuthModule, TraditionalClothingModule],
+  imports: [
+    UserModule, 
+    AuthModule, 
+    TraditionalClothingModule, 
+    ConfigModule.forRoot({
+      isGlobal: true, // Agar ConfigService bisa diakses di seluruh aplikasi
+    })
+  ],
   controllers: [AppController],
   providers: [AppService, ProvinceService, FileUploadService],
 })

@@ -9,7 +9,7 @@ import {
   Query, 
   Res, 
   UseInterceptors, 
-  UploadedFile 
+  UploadedFile, 
 } from '@nestjs/common';
 import { Response } from 'express'
 import { TraditionalClothingService } from './traditional-clothing.service';
@@ -52,16 +52,37 @@ export class TraditionalClothingController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.traditionalClothingService.findOne(+id);
+    return this.traditionalClothingService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTraditionalClothingDto: UpdateTraditionalClothingDto) {
-    return this.traditionalClothingService.update(+id, updateTraditionalClothingDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async update(
+    @Param('id') id: string, 
+    @Body() updateTraditionalClothingDto: UpdateTraditionalClothingDto,
+    @Res() response:Response,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    let fileData=null;
+    if(file){
+      fileData=await this.fileUploadService.handleFileUpload(file);
+
+      if(!fileData.status){
+        return response.status(fileData.statusCode).json(fileData);
+      }
+
+      fileData=fileData.data.data
+    }
+
+    const traditionalClothingUpdate=await this.traditionalClothingService.update(id, updateTraditionalClothingDto, fileData);
+    
+    return response.status(traditionalClothingUpdate.statusCode).json(traditionalClothingUpdate);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.traditionalClothingService.remove(+id);
+  async remove(@Param('id') id: string, @Res() response:Response) {
+     const traditionalClothingDelete=await this.traditionalClothingService.remove(id);
+
+     return response.status(traditionalClothingDelete.statusCode).json(traditionalClothingDelete);
   }
 }

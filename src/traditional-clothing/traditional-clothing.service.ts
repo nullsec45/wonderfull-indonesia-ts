@@ -6,27 +6,65 @@ import { Paginate } from 'utils/paginate'
 import { PrismaService } from 'services/prisma.service';
 import { ResponseData } from 'types/response';
 import {responseValue, responseValueWithData} from 'utils/response';
+import { FileUploadService } from 'services/file-upload/file-upload.service';
+import { isRecordNotFound } from 'utils/check-record';
+import { TraditionalClothing } from '@prisma/client';
 
 
 @Injectable()
 export class TraditionalClothingService {
-  constructor(private prisma:PrismaService){
+  constructor(
+    private prisma:PrismaService,
+    private readonly fileUploadService:FileUploadService
+  ){
 
   }
 
   async findByProvinceAndName<T>(params:T){
     try{
-      return this.prisma.traditionalClothing.findFirst({
-        where:  typeof params === "number" ? { province_id: params }: { name: params }
+      const data=this.prisma.traditionalClothing.findFirst({
+        select:{
+          name:true,
+          province_id:true,
+        },
+        where: {
+          OR:[
+            {
+              province_id:params,
+            },
+            {
+              name:params
+            }
+          ]
+        }
       });
+
+      return data;
     }catch{
       throw new InternalServerErrorException();
     }
   }
 
+  async checkTraditionalClothingExists(id:string){
+    try{
+        const traditionalClothing = await this.prisma.traditionalClothing.findUnique(
+          { 
+            select:{
+              image:true
+            },
+            where: { id } 
+          }
+        );
+
+         return traditionalClothing
+    }catch(error){
+        return error;
+    }
+  }
+
   async create(createTraditionalClothingDto: CreateTraditionalClothingDto, fileName:string):Promise<ResponseData> {
       try{
-        const provinceId = Number(createTraditionalClothingDto.province_id);
+        const provinceId = createTraditionalClothingDto.province_id;
 
         const province = await this.prisma.province.findUnique({
           where: { id: provinceId },
@@ -36,19 +74,17 @@ export class TraditionalClothingService {
           return responseValue(false, HttpStatus.BAD_REQUEST, 'Invalid Province ID');
         }
 
-        const findBYProvince= await  this.findByProvinceAndName<number>(createTraditionalClothingDto.province_id);
+        const findBYProvince= await  this.findByProvinceAndName<string>(createTraditionalClothingDto.province_id);
 
-        if (findBYProvince) {
-            return responseValue(false,HttpStatus.CONFLICT,'Traditional clothing already exist');
+        if (findBYProvince && findBYProvince.province_id) {
+          return responseValue(false,HttpStatus.CONFLICT,'Traditional clothing already exist');
         }
 
         const findByName = await  this.findByProvinceAndName<string>(createTraditionalClothingDto.name);
 
-        if (findByName) {
+        if (findByName  && findBYProvince.name) {
             return responseValue(false,HttpStatus.CONFLICT,'Traditional clothing already exist');
         }
-
-    
 
         const traditionalClothing = await this.prisma.traditionalClothing.create({
           data: {
@@ -73,36 +109,84 @@ export class TraditionalClothingService {
 
 
         if (traditionalClothings.length <= 0) {
-          return responseValue(false, HttpStatus.NOT_FOUND, "Data Traditional Clothing Not Found");
+          return responseValue(false, HttpStatus.NOT_FOUND, 'Data Traditional Clothing Not Found');
         }
 
-        return responseValueWithData(true, HttpStatus.OK,"Success Get Data Tranditional Clothing",traditionalClothings);
+        return responseValueWithData(true, HttpStatus.OK,'Success Get Data Traditional Clothing',traditionalClothings);
       }catch(error){
         return responseValue(false, HttpStatus.CONFLICT, error.message);
       }
   }
 
-  async  findOne(id: number) {
+  async  findOne(id: string) {
     try {
-      const traditionalClothing = await this.prisma.traditionalClothing.findUnique({ where: { id } })
+      const traditionalClothing=this.checkTraditionalClothingExists(id);
 
-      const isTraditionalClothingNotFound: boolean = [undefined, null].includes(traditionalClothing)
-      if (isTraditionalClothingNotFound) {
-       return responseValue(false, HttpStatus.NOT_FOUND, 'Traditional Clothing Not Found')
+      if (isRecordNotFound(traditionalClothing)) {
+          return responseValue(false, HttpStatus.NOT_FOUND, 'Traditional Clothing Not Found')
       }
 
       return responseValueWithData(true, HttpStatus.OK, 'Success Get Traditional Clothing',traditionalClothing);
     } catch (error) {
-      console.error(error)
-      throw new InternalServerErrorException()
+        return responseValue(false, HttpStatus.CONFLICT, error.message);
     }
   }
 
-  update(id: number, updateTraditionalClothingDto: UpdateTraditionalClothingDto) {
-    return `This action updates a #${id} traditionalClothing`;
+ async update(id: string, updateTraditionalClothingDto: UpdateTraditionalClothingDto, fileName:string) {
+      try{
+        const traditionalClothing=await this.checkTraditionalClothingExists(id);
+
+        if (isRecordNotFound(traditionalClothing)) {
+          await this.fileUploadService.handleFileDelete(fileName);
+          return responseValue(false, HttpStatus.NOT_FOUND, 'Traditional Clothing Not Found')
+        }
+
+        const province = await this.prisma.province.findUnique({
+          where: { id: updateTraditionalClothingDto.province_id },
+        });
+
+        if (!province) {
+          return responseValue(false, HttpStatus.BAD_REQUEST, 'Invalid Province ID');
+        }
+
+        const record:any={
+            name: updateTraditionalClothingDto.name,
+            province: {connect:{id:updateTraditionalClothingDto.province_id}},
+        }
+        console.log(traditionalClothing.image);
+
+        if(fileName !== null){
+          record.image=fileName;
+          await this.fileUploadService.handleFileDelete(traditionalClothing.image);
+        }
+
+        const traditionalClothingUpdate = await this.prisma.traditionalClothing.update({
+          where: { id },
+          data:record
+        });
+
+        return responseValueWithData(true, HttpStatus.OK,'Success Update Traditional Clothing',traditionalClothingUpdate);
+      }catch(error){
+        return responseValue(false, HttpStatus.CONFLICT, error.message);
+      }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} traditionalClothing`;
+  async remove(id: string) {
+    try{
+      const traditionalClothing=await this.checkTraditionalClothingExists(id);
+
+      if (isRecordNotFound(traditionalClothing)) {
+        return responseValue(false, HttpStatus.NOT_FOUND, 'Traditional Clothing Not Found')
+      }
+
+      await this.fileUploadService.handleFileDelete(traditionalClothing.image);
+      await this.prisma.traditionalClothing.delete({
+        where:{id}
+      });
+
+      return responseValue(false, HttpStatus.OK, 'Success Delete Traditional Clothing')
+    }catch(error){
+        return responseValue(false, HttpStatus.CONFLICT, error.message);
+    }
   }
 }

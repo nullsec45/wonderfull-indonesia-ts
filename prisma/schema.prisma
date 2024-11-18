@@ -31,6 +31,7 @@ model Province {
   name                String                @db.VarChar(100)
   regencies           Regency[]
   TraditionalClothing TraditionalClothing[]
+  TraditionalHouse    TraditionalHouse[]
 
   @@map("provinces")
 }
@@ -73,4 +74,14 @@ model TraditionalClothing {
   image       String   @db.VarChar(255)
 
   @@map("traditional_clothings")
+}
+
+model TraditionalHouse {
+  id          String     @id @default(uuid()) @db.VarChar(36)
+  name        String   @db.VarChar(255)
+  province_id String
+  province    Province @relation(fields: [province_id], references: [id])
+  image       String   @db.VarChar(255)
+
+  @@map("traditional_houses")
 }

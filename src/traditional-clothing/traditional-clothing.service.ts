@@ -8,7 +8,6 @@ import { ResponseData } from 'types/response';
 import {responseValue, responseValueWithData} from 'utils/response';
 import { FileUploadService } from 'services/file-upload/file-upload.service';
 import { isRecordNotFound } from 'utils/check-record';
-import { TraditionalClothing } from '@prisma/client';
 
 
 @Injectable()
@@ -45,13 +44,20 @@ export class TraditionalClothingService {
     }
   }
 
-  async checkTraditionalClothingExists(id:string){
+  async checkTraditionalClothingExists(id:string, type:string){
+     const selectData:any={
+          image:true
+     }
+
+    if(type == 'detail'){
+      selectData.province_id=true;
+      selectData.name=true;
+    }
+
     try{
         const traditionalClothing = await this.prisma.traditionalClothing.findUnique(
           { 
-            select:{
-              image:true
-            },
+            select:selectData,
             where: { id } 
           }
         );
@@ -118,9 +124,9 @@ export class TraditionalClothingService {
       }
   }
 
-  async  findOne(id: string) {
+  async findOne(id: string):Promise<ResponseData> {
     try {
-      const traditionalClothing=this.checkTraditionalClothingExists(id);
+      const traditionalClothing=this.checkTraditionalClothingExists(id, 'detail');
 
       if (isRecordNotFound(traditionalClothing)) {
           return responseValue(false, HttpStatus.NOT_FOUND, 'Traditional Clothing Not Found')
@@ -132,9 +138,9 @@ export class TraditionalClothingService {
     }
   }
 
- async update(id: string, updateTraditionalClothingDto: UpdateTraditionalClothingDto, fileName:string) {
+  async update(id: string, updateTraditionalClothingDto: UpdateTraditionalClothingDto, fileName:string) {
       try{
-        const traditionalClothing=await this.checkTraditionalClothingExists(id);
+        const traditionalClothing=await this.checkTraditionalClothingExists(id,'update');
 
         if (isRecordNotFound(traditionalClothing)) {
           await this.fileUploadService.handleFileDelete(fileName);
@@ -173,7 +179,7 @@ export class TraditionalClothingService {
 
   async remove(id: string) {
     try{
-      const traditionalClothing=await this.checkTraditionalClothingExists(id);
+      const traditionalClothing=await this.checkTraditionalClothingExists(id,'delete');
 
       if (isRecordNotFound(traditionalClothing)) {
         return responseValue(false, HttpStatus.NOT_FOUND, 'Traditional Clothing Not Found')

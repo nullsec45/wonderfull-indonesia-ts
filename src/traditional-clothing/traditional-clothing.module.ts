@@ -15,7 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject:[ConfigService],
       useFactory:(configService:ConfigService) => ({
           storage:diskStorage({
-          destination:configService.get<string>('PATH_FILE'),
+          destination:configService.get<string>('PATH_FILE_CLOTHING'),
             filename:(req,file,cb) => {
               const filename=`${Date.now()}_${file.originalname}`;
               cb(null, filename);

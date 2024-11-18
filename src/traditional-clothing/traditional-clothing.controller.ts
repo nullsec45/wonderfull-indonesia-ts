@@ -51,8 +51,9 @@ export class TraditionalClothingController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.traditionalClothingService.findOne(id);
+  async findOne(@Param('id') id: string, @Res() response:Response) {
+    const traditionalClothings= await this.traditionalClothingService.findOne(id);
+    return response.status(traditionalClothings.statusCode).json(traditionalClothings);
   }
 
   @Patch(':id')

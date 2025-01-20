@@ -17,7 +17,7 @@ export class FileUploadService {
                 return responseValue(false, HttpStatus.NOT_FOUND,"File Not Found")
             }
 
-            const allowedMimeTypes=["image/jpeg","image/png","application/pdf"];
+            const allowedMimeTypes=["image/jpeg","image/png"];
             if(!allowedMimeTypes.includes(file.mimetype)){
                 return responseValue(false,HttpStatus.CONFLICT, "Invalid File Type");
             }

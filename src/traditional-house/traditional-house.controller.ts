@@ -18,8 +18,10 @@ import { UpdateTraditionalHouseDto } from './dto/update-traditional-house.dto';
 import { PaginationDTO } from 'dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileUploadService } from 'services/file-upload/file-upload.service';
+import { ApiTags, ApiResponse, ApiBody, ApiOperation,ApiConsumes } from '@nestjs/swagger'
 
 
+@ApiTags('Traditional House')
 @Controller('traditional-house')
 export class TraditionalHouseController {
   constructor(
@@ -27,7 +29,29 @@ export class TraditionalHouseController {
     private readonly fileUploadService: FileUploadService
   ) {}
 
+  @ApiBody({
+      description: 'request body post traditional house.',
+      type: CreateTraditionalHouseDto
+  })
   @Post()
+  @ApiOperation({ summary: 'Submit form with multipart/form-data' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: 201,
+    description: 'Success Post Traditional House.'
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid Province Id.'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'File Not Found.'
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Traditional house already exist.'
+  })
   @UseInterceptors(FileInterceptor('file'))
   async create(
     @Body() createTraditionalHouseDto: CreateTraditionalHouseDto,
@@ -44,6 +68,10 @@ export class TraditionalHouseController {
     return response.status(createTraditionalHouse.statusCode).json(createTraditionalHouse);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Get all data traditional house.'
+  })
   @Get()
   async findAll(
     @Query() paginationDTO: PaginationDTO, 
@@ -54,13 +82,39 @@ export class TraditionalHouseController {
     return response.status(traditionalHouses.statusCode).json(traditionalHouses);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Get data traditional house by id.'
+  })
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() response:Response) {
     const traditionalClothings=await this.traditionalHouseService.findOne(id);
     return response.status(traditionalClothings.statusCode).json(traditionalClothings);
   }
 
+  @ApiBody({
+      description: 'request body update traditional house.',
+      type: CreateTraditionalHouseDto
+  })
   @Patch(':id')
+  @ApiOperation({ summary: 'Submit form with multipart/form-data' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: 200,
+    description: 'Success Patch Traditional House.'
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid Province Id.'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'File Not Found.'
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Traditional house already exist.'
+  })
   @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
@@ -86,6 +140,10 @@ export class TraditionalHouseController {
   }
 
   @Delete(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Success Delete traditional Cloth.'
+  })
   async remove(@Param('id') id: string, @Res() response:Response) {
      const traditionalClothings=await this.traditionalHouseService.remove(id);
      return response.status(traditionalClothings.statusCode).json(traditionalClothings);

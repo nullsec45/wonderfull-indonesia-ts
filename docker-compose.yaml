@@ -1,0 +1,25 @@
+services:
+  proxy-relay:
+    image: alpine/socat:latest
+    network_mode: host
+    command: TCP-LISTEN:8080,fork,bind=host.docker.internal TCP-CONNECT:127.0.0.1:8080
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  backend-app:
+    container_name: backend-app
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    build: .
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=mysql://root:RootAllHost45_@host.docker.internal:3306/ezrent
+      - JWT_SECRET=dicodingcapstone_ezrent
+    networks:
+      - backend-net
+
+networks:
+  backend-net:
+    driver: bridge

@@ -15,9 +15,9 @@ datasource db {
 
 model User {
   id       String  @id @default(uuid()) @db.VarChar(36)
-  name     String  @db.VarChar(75)
-  username String  @unique @db.VarChar(75)
-  email    String  @unique @db.VarChar(75)
+  name     String  @db.VarChar(150)
+  username String  @unique @db.VarChar(100)
+  email    String  @unique @db.VarChar(100)
   password String? @db.VarChar(255)
 
   createdAt DateTime @default(now())
@@ -78,7 +78,7 @@ model TraditionalClothing {
 }
 
 model TraditionalHouse {
-  id          String     @id @default(uuid()) @db.VarChar(36)
+  id          String   @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(255)
   province_id String
   province    Province @relation(fields: [province_id], references: [id])
@@ -88,7 +88,7 @@ model TraditionalHouse {
 }
 
 model TraditionalFood {
-  id          String     @id @default(uuid()) @db.VarChar(36)
+  id          String   @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(255)
   province_id String
   province    Province @relation(fields: [province_id], references: [id])

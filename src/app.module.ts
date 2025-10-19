@@ -9,6 +9,9 @@ import { FileUploadService } from './services/file-upload/file-upload.service';
 import { ConfigModule } from '@nestjs/config';
 import { TraditionalHouseModule } from './traditional-house/traditional-house.module';
 import { TraditionalFoodModule } from './traditional-food/traditional-food.module';
+// import { PlatNumberModule } from './plat-number/plat-number.module';
+// import { RegionalModule } from './regional/regional.module';
+import { JwtService } from '@nestjs/jwt/dist';
 
 @Module({
   imports: [
@@ -17,11 +20,13 @@ import { TraditionalFoodModule } from './traditional-food/traditional-food.modul
     ConfigModule.forRoot({
       isGlobal: true, // Agar ConfigService bisa diakses di seluruh aplikasi
     }), 
+    // RegionalModule,
     TraditionalClothingModule, 
     TraditionalHouseModule, 
-    TraditionalFoodModule
+    TraditionalFoodModule, 
+    // PlatNumberModule
   ],
   controllers: [AppController],
-  providers: [AppService, ProvinceService, FileUploadService],
+  providers: [AppService, JwtService, ProvinceService, FileUploadService],
 })
 export class AppModule {}

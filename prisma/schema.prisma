@@ -20,19 +20,22 @@ model User {
   email    String  @unique @db.VarChar(100)
   password String? @db.VarChar(255)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime?
+  updatedAt DateTime? 
 
   @@map("users")
 }
 
 model Province {
   id                  String                @id @default(uuid()) @db.VarChar(36)
-  name                String                @db.VarChar(100)
+  name                String                @unique @db.VarChar(200)
   regencies           Regency[]
   TraditionalClothing TraditionalClothing[]
   TraditionalHouse    TraditionalHouse[]
   TraditionalFood    TraditionalFood[]
+
+  createdAt DateTime?
+  updatedAt DateTime?
 
   @@map("provinces")
 }
@@ -41,8 +44,11 @@ model Regency {
   id          String       @id @default(uuid()) @db.VarChar(36)
   name        String     @db.VarChar(100)
   province_id String
-  province    Province   @relation(fields: [province_id], references: [id])
+  province    Province   @relation(fields: [province_id], references: [id], onDelete:Cascade)
   District    District[]
+
+  createdAt DateTime?
+  updatedAt DateTime?
 
   @@map("regencies")
 }
@@ -51,9 +57,12 @@ model District {
   id         String      @id @default(uuid()) @db.VarChar(36)
   name       String    @db.VarChar(100)
   regency_id String
-  regency    Regency   @relation(fields: [regency_id], references: [id])
+  regency    Regency   @relation(fields: [regency_id], references: [id], onDelete:Cascade)
   Village    Village[]
 
+  createdAt DateTime? 
+  updatedAt DateTime?
+  
   @@map("districts")
 }
 
@@ -61,9 +70,12 @@ model Village {
   id          String     @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(100)
   district_id String
-  district    District @relation(fields: [district_id], references: [id])
+  district    District @relation(fields: [district_id], references: [id], onDelete:Cascade)
   postal_code String   @db.VarChar(10)
 
+  createdAt DateTime? 
+  updatedAt DateTime?
+  
   @@map("villages")
 }
 
@@ -71,9 +83,12 @@ model TraditionalClothing {
   id          String     @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(255)
   province_id String
-  province    Province @relation(fields: [province_id], references: [id])
+  province    Province @relation(fields: [province_id], references: [id], onDelete:Cascade)
   image       String   @db.VarChar(255)
 
+  createdAt DateTime? 
+  updatedAt DateTime?
+  
   @@map("traditional_clothings")
 }
 
@@ -81,9 +96,12 @@ model TraditionalHouse {
   id          String   @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(255)
   province_id String
-  province    Province @relation(fields: [province_id], references: [id])
+  province    Province @relation(fields: [province_id], references: [id], onDelete:Cascade)
   image       String   @db.VarChar(255)
 
+  createdAt DateTime? 
+  updatedAt DateTime?
+  
   @@map("traditional_houses")
 }
 
@@ -91,8 +109,11 @@ model TraditionalFood {
   id          String   @id @default(uuid()) @db.VarChar(36)
   name        String   @db.VarChar(255)
   province_id String
-  province    Province @relation(fields: [province_id], references: [id])
+  province    Province @relation(fields: [province_id], references: [id], onDelete:Cascade)
   image       String   @db.VarChar(255)
 
+  createdAt DateTime? 
+  updatedAt DateTime?
+  
   @@map("traditional_foods")
 }

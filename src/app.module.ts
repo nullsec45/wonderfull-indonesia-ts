@@ -12,6 +12,7 @@ import { TraditionalFoodModule } from './traditional-food/traditional-food.modul
 // import { PlatNumberModule } from './plat-number/plat-number.module';
 // import { RegionalModule } from './regional/regional.module';
 import { JwtService } from '@nestjs/jwt/dist';
+import { ProvinceModule } from './region/province.module';
 
 @Module({
   imports: [
@@ -25,8 +26,9 @@ import { JwtService } from '@nestjs/jwt/dist';
     TraditionalHouseModule, 
     TraditionalFoodModule, 
     // PlatNumberModule
+    ProvinceModule
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService, ProvinceService, FileUploadService],
+  providers: [AppService, JwtService, FileUploadService],
 })
 export class AppModule {}

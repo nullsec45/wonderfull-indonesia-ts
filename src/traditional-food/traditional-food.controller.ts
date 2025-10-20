@@ -9,7 +9,8 @@ import {
   UseInterceptors, 
   UploadedFile, 
   Res,
-  Query
+  Query,
+  UseGuards
  } from '@nestjs/common';
 import { Response } from 'express'
 import { TraditionalFoodService } from './traditional-food.service';
@@ -19,6 +20,8 @@ import { PaginationDTO } from 'dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileUploadService } from 'services/file-upload/file-upload.service';
 import { ApiTags, ApiResponse, ApiBody, ApiOperation,ApiConsumes } from '@nestjs/swagger'
+import { JwtAuthGuard } from 'auth/jwt-auth.guard';
+import {AuthenticationGuard} from 'auth/authenticated.guard'
 
 @ApiTags('Traditional Food')
 @Controller('traditional-food')
@@ -28,6 +31,8 @@ export class TraditionalFoodController {
     private readonly fileUploadService : FileUploadService
   ) {}
 
+  @UseGuards(AuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBody({
     description: 'request body post traditional food.',
     type: CreateTraditionalFoodDto
@@ -76,7 +81,6 @@ export class TraditionalFoodController {
     const traditionalFoods=await this.traditionalFoodService.findAll(paginationDTO);
     return response.status(traditionalFoods.statusCode).json(traditionalFoods);
   }
-
   @ApiResponse({
     status: 200,
     description: 'Get data traditional house by id.'
@@ -86,9 +90,11 @@ export class TraditionalFoodController {
     return this.traditionalFoodService.findOne(id);
   }
 
-   @ApiBody({
-        description: 'request body update traditional house.',
-        type: CreateTraditionalFoodDto
+  @UseGuards(AuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({
+      description: 'request body update traditional house.',
+      type: CreateTraditionalFoodDto
   })
   @Patch(':id')
   @ApiOperation({ summary: 'Submit form with multipart/form-data' })
@@ -131,6 +137,8 @@ export class TraditionalFoodController {
     return response.status(updateTraditionalFood.statusCode).json(updateTraditionalFood);
   }
 
+  @UseGuards(AuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiResponse({
     status: 200,
